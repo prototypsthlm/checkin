@@ -26,6 +26,61 @@
 
 var gpio = require("pi-gpio");
 
+function writeHigh(pin){
+	console.log(pin + " high");
+	gpio.open(pin, "output", function(err) {
+		gpio.write(pin, 1, function() {
+			gpio.close(pin);
+		});
+	});
+}
+
+function writeLow(pin){
+	console.log(pin + " low");
+	gpio.open(pin, "output", function(err) {
+		gpio.write(pin, 0, function() {
+			gpio.close(pin);
+		});
+	});
+}
+
+function blink(pin, interval, blinkTime){
+
+	//set default value of interval
+	//time between turning on and off
+	if(interval === undefined) interval = 500;
+
+	//set default time for blinkTime
+	//number of times to blink the light on and off
+	if(blinkTime === undefined) blinkTime = 5;
+
+	//initialize the counting variable
+	var i = 1;
+
+	//timed loop to turn on and off the loop
+	function myloop(){
+		setTimeout(function(){
+			//alternating between off and on
+			if(i%2 === 0){
+				writeHigh(pin);
+			} else {
+				writeLow(pin);
+			}
+			i++;
+			if(i <= blinkTime * 2){
+				//still blinking
+				myloop();
+			} else {
+				//the light has blinked blinkTime times
+				// we are done with pin
+				//closePin(pin)
+			}
+		}, interval);
+	}
+	//first call of the loop
+	myloop();
+}
+
 exports.index = function(req, res){
 
 	/*gpio4.set(function() {
@@ -33,10 +88,14 @@ exports.index = function(req, res){
 		res.render('index', { title: gpio4.value });
 	});*/
 
-	var state = req.query.state === "1" ? 1 : 0;
+	//var state = req.query.state === "1" ? 1 : 0;
 	var pin = req.query.pin ? parseInt(req.query.pin, 10) : 7;
 
-	gpio.open(pin, "output", function(err) { // Open pin 16 for output
+	blink(pin, 500, 10000);
+
+	res.json(200, { message: 'success'} );
+
+	/*gpio.open(pin, "output", function(err) { // Open pin 16 for output
 
 		if(err) throw err;
 
@@ -56,6 +115,6 @@ exports.index = function(req, res){
 
 		});
 
-	});
+	});*/
 
 };
