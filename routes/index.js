@@ -91,7 +91,7 @@ exports.index = function(req, res){
 	//var state = req.query.state === "1" ? 1 : 0;
 	var pin = req.query.pin ? parseInt(req.query.pin, 10) : 7;
 
-	blink(pin, 500, 10000);
+	blink(pin, 2000, 10000);
 
 	res.json(200, { message: 'success'} );
 
