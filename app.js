@@ -35,7 +35,14 @@ http.createServer(app).listen(app.get('port'), function(){
 });
 
 
-var gpio = require("gpio");
+var gpio = require("pi-gpio");
+
+gpio.read(16, function(err, value){
+  //if(err) throw err;
+  console.log(value);    // The current state of the pin
+});
+
+/*var gpio = require("gpio");
 var gpio22, gpio4, intervalTimer;
 
 // Flashing lights if LED connected to GPIO22
@@ -73,6 +80,6 @@ setTimeout(function() {
     // unexport takes a callback which gets fired as soon as unexporting is done
     //process.exit(); // exits your node program
   });
-}, 10000);
+}, 10000);*/
 
 
