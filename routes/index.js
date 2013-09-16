@@ -24,6 +24,8 @@
 	}
 });*/
 
+var gpio = require("pi-gpio");
+
 exports.index = function(req, res){
 
 	/*gpio4.set(function() {
@@ -31,7 +33,28 @@ exports.index = function(req, res){
 		res.render('index', { title: gpio4.value });
 	});*/
 
-	res.render('index', { title: gpio4.value });
+	var state = req.query.state === "1" ? 1 : 0;
 
+	gpio.open(16, "output", function(err) { // Open pin 16 for output
+
+		if(err) throw err;
+
+		gpio.write(16, state, function() {
+
+			gpio.read(16, function(err, value){
+
+				if(err) throw err;
+
+				console.log("pin_val:", value);    // The current state of the pin
+
+				gpio.close(16);  // Close pin 16
+
+				res.render('index', { title: value });
+
+			});
+
+		});
+
+	});
 
 };
