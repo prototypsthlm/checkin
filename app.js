@@ -37,9 +37,13 @@ http.createServer(app).listen(app.get('port'), function(){
 
 var gpio = require("pi-gpio");
 
-gpio.read(16, function(err, value){
-  //if(err) throw err;
-  console.log(value);    // The current state of the pin
+
+
+
+gpio.open(16, "output", function(err) {        // Open pin 16 for output
+    gpio.write(16, 1, function() {            // Set pin 16 high (1)
+        gpio.close(16);                        // Close pin 16
+    });
 });
 
 /*var gpio = require("gpio");
