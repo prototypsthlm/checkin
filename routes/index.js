@@ -34,20 +34,21 @@ exports.index = function(req, res){
 	});*/
 
 	var state = req.query.state === "1" ? 1 : 0;
+	var pin = req.query.pin ? parseInt(req.query.pin, 10) : 7;
 
-	gpio.open(16, "output", function(err) { // Open pin 16 for output
+	gpio.open(pin, "output", function(err) { // Open pin 16 for output
 
 		if(err) throw err;
 
-		gpio.write(16, state, function() {
+		gpio.write(pin, state, function() {
 
-			gpio.read(16, function(err, value){
+			gpio.read(pin, function(err, value){
 
 				if(err) throw err;
 
 				console.log("pin_val:", value);    // The current state of the pin
 
-				gpio.close(16);  // Close pin 16
+				gpio.close(pin);  // Close pin 16
 
 				res.render('index', { title: value });
 
