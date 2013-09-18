@@ -3,118 +3,95 @@
  * GET home page.
  */
 
-//var gpio = require("gpio");
-
-// Calling export with a pin number will export that header and return a gpio header instance
-
-/*var gpio4 = gpio.export(4, {
-	// When you export a pin, the default direction is out. This allows you to set
-	// the pin value to either LOW or HIGH (3.3V) from your program.
-	direction: 'out',
-
-	// set the time interval (ms) between each read when watching for value changes
-	// note: this is default to 100, setting value too low will cause high CPU usage
-	interval: 200,
-
-	// Due to the asynchronous nature of exporting a header, you may not be able to
-	// read or write to the header right away. Place your logic in this ready
-	// function to guarantee everything will get fired properly
-	ready: function() {
-
-	}
-});*/
-
-var gpio = require("pi-gpio");
-
-function writeHigh(pin){
-	console.log(pin + " high");
-	gpio.open(pin, "output", function(err) {
-		gpio.write(pin, 1, function() {
-			gpio.close(pin);
-		});
-	});
-}
-
-function writeLow(pin){
-	console.log(pin + " low");
-	gpio.open(pin, "output", function(err) {
-		gpio.write(pin, 0, function() {
-			gpio.close(pin);
-		});
-	});
-}
-
-function blink(pin, interval, blinkTime){
-
-	//set default value of interval
-	//time between turning on and off
-	if(interval === undefined) interval = 500;
-
-	//set default time for blinkTime
-	//number of times to blink the light on and off
-	if(blinkTime === undefined) blinkTime = 5;
-
-	//initialize the counting variable
-	var i = 1;
-
-	//timed loop to turn on and off the loop
-	function myloop(){
-		setTimeout(function(){
-			//alternating between off and on
-			if(i%2 === 0){
-				writeHigh(pin);
-			} else {
-				writeLow(pin);
-			}
-			i++;
-			if(i <= blinkTime * 2){
-				//still blinking
-				myloop();
-			} else {
-				//the light has blinked blinkTime times
-				// we are done with pin
-				//closePin(pin)
-			}
-		}, interval);
-	}
-	//first call of the loop
-	myloop();
-}
+var tellstick = require('tellstick');
+var td = tellstick();
 
 exports.index = function(req, res){
 
-	/*gpio4.set(function() {
-		console.log(gpio4.value); // should log 1
-		res.render('index', { title: gpio4.value });
-	});*/
-
-	//var state = req.query.state === "1" ? 1 : 0;
-	var pin = req.query.pin ? parseInt(req.query.pin, 10) : 7;
-
-	blink(pin, 2000, 10000);
-
 	res.json(200, { message: 'success'} );
 
-	/*gpio.open(pin, "output", function(err) { // Open pin 16 for output
+};
 
-		if(err) throw err;
+exports.list = function(req, res){
 
-		gpio.write(pin, state, function() {
+	td.list(function(err, list){
+		if(!err){
+			res.json(200, { message: 'success', list: list } );
+		}
+		else {
+			res.json(500, { message: 'failure'} );
+		}
+	});
+	
+};
 
-			gpio.read(pin, function(err, value){
+exports.toggle = function(req, res){
 
-				if(err) throw err;
+	var on = req.query.on ? req.query.on : '1';
+	var off = req.query.off ? req.query.off : '2';
 
-				console.log("pin_val:", value);    // The current state of the pin
+	td.turnOn(on, function(err){
 
-				gpio.close(pin);  // Close pin 16
-
-				res.render('index', { title: value });
-
+		if(!err){
+			console.log('Switch is turned on:', on);
+			td.turnOff(off, function(err){
+				if(!err){
+					console.log('Switch is turned off:', off);
+					res.json(200, { message: 'success'} );
+				}
+				else {
+					console.log("failed turning off device:", off);
+					res.json(500, { message: 'failure'} );
+				}
 			});
+		} 
+		else {
+			console.log("failed turning on device:", on);
+			res.json(500, { message: 'failure'} );
+		}
 
+	});
+
+};
+
+exports.on = function(req, res){
+
+	var device_id = req.query.id;
+
+	if(device_id){
+		td.turnOn(device_id, function(err){
+			if(!err){
+				console.log('Switch is turned on:', device_id);
+			} 
+			else {
+				console.log("failed turning on device:", device_id);
+				res.json(500, { message: 'failure'} );
+			}
 		});
+	}
+	else {
+		res.json(500, { message: 'failure: no ID specified.'});
+	}
 
-	});*/
+};
+
+exports.off = function(req, res){
+
+	var device_id = req.query.id;
+
+	if(device_id){
+		td.turnOff(device_id, function(err){
+			if(!err){
+				console.log('Switch is turned off:', device_id);
+			} 
+			else {
+				console.log("failed turning off device:", device_id);
+				res.json(500, { message: 'failure' } );
+			}
+		});
+	}
+	else {
+		res.json(500, { message: 'failure: no ID specified.'});
+	}
 
 };

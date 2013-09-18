@@ -5,7 +5,6 @@
 
 var express = require('express')
   , routes = require('./routes')
-  , user = require('./routes/user')
   , http = require('http')
   , path = require('path');
 
@@ -27,8 +26,19 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+var ensureToken = function(req, res, next) {
+  if (req.query.token === "snake") { 
+    return next(); 
+  }
+  res.redirect('/');
+};
+
 app.get('/', routes.index);
-app.get('/users', user.list);
+app.get('/toggle', ensureToken, routes.toggle);
+app.get('/on', ensureToken, routes.on);
+app.get('/off', ensureToken, routes.off);
+app.get('/list', ensureToken, routes.list);
+
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
