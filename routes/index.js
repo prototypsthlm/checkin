@@ -6,42 +6,69 @@
 var tellstick = require('tellstick');
 var td = tellstick();
 
+var server_up = '1';
+var server_down = '2';
+
 exports.index = function(req, res){
 
 	res.json(200, { message: 'success'} );
 
 };
 
-exports.sync = function(req, res){
+function setLights(req, res, on, off){
 
-	td.list(function(err, list){
+	td.turnOn(on, function(err){
 
-		if(!err && list){
-
-			for(var d in list){
-
-				var device = list[d];
-
-				if(device){
-					var id = device[0];
-					var status = device[2];
-					if(id && status && status === "ON"){
-						td.turnOff(id);
-					}
-					else if(id && status && status === "OFF"){
-						td.turnOn(id);
-					}
+		if(!err){
+			console.log('Switch is turned on:', on);
+			td.turnOff(off, function(err){
+				if(!err){
+					console.log('Switch is turned off:', off);
+					res.json(200, { message: 'success'} );
 				}
-
-			}
-			
-			res.json(200, { message: 'success : syncing' } );			
-		}
+				else {
+					console.log("failed turning off device:", off);
+					res.json(500, { message: 'failure'} );
+				}
+			});
+		} 
 		else {
-			res.json(500, { message: 'failure' } );
+			console.log("failed turning on device:", on);
+			res.json(500, { message: 'failure'} );
 		}
 
 	});
+
+}
+
+exports.sync = function(req, res){
+
+	try {
+		td.list(function(err, list){
+
+			if(!err && list){
+
+				var server_up_status = list[0][2];
+				var server_down_status = list[1][2];
+
+				if(server_down_status === "ON"){
+					setLights(server_down, server_up);
+				}
+				else if(server_up_status === "ON") {
+					setLights(server_up, server_down);
+				}
+
+			}
+			else {
+				res.json(500, { message: 'failure' } );
+			}
+
+		});
+	}
+	catch(e){
+		res.json(500, { message: e } );
+	}
+	
 };
 
 exports.list = function(req, res){
@@ -59,12 +86,10 @@ exports.list = function(req, res){
 
 exports.toggle = function(req, res){
 
-	var server_up = '1';
-	var server_down = '2';
-
 	var on, off;
 
 	if(req.query.status){
+
 		if(req.query.status === "down"){
 			on = server_down;
 			off = server_up;
@@ -73,39 +98,14 @@ exports.toggle = function(req, res){
 			on = server_up;
 			off = server_down;
 		}
-	}
 
-	if(req.query.on){
-		on = req.query.on;
-	}
-
-	if(req.query.off){
-		off = req.query.off;
 	}
 
 	if(on && off){
-
-		td.turnOn(on, function(err){
-
-			if(!err){
-				console.log('Switch is turned on:', on);
-				td.turnOff(off, function(err){
-					if(!err){
-						console.log('Switch is turned off:', off);
-						res.json(200, { message: 'success'} );
-					}
-					else {
-						console.log("failed turning off device:", off);
-						res.json(500, { message: 'failure'} );
-					}
-				});
-			} 
-			else {
-				console.log("failed turning on device:", on);
-				res.json(500, { message: 'failure'} );
-			}
-
-		});
+		setLights(on, off);
+	}
+	else {
+		res.json(500, { message: 'failure'});
 	}
 
 };
