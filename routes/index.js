@@ -52,10 +52,10 @@ exports.sync = function(req, res){
 				var server_down_status = list[1][2];
 
 				if(server_down_status === "ON"){
-					setLights(server_down, server_up);
+					setLights(req, res, server_down, server_up);
 				}
 				else if(server_up_status === "ON") {
-					setLights(server_up, server_down);
+					setLights(req, res, server_up, server_down);
 				}
 
 			}
@@ -102,7 +102,7 @@ exports.toggle = function(req, res){
 	}
 
 	if(on && off){
-		setLights(on, off);
+		setLights(req, res, on, off);
 	}
 	else {
 		res.json(500, { message: 'failure'});
