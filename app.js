@@ -35,8 +35,8 @@ var ensureToken = function(req, res, next) {
 
 app.get('/', routes.index);
 app.get('/toggle', ensureToken, routes.toggle);
-app.get('/on', ensureToken, routes.on);
-app.get('/off', ensureToken, routes.off);
+app.get('/on/:id', ensureToken, routes.on);
+app.get('/off/:id', ensureToken, routes.off);
 app.get('/list', ensureToken, routes.list);
 
 

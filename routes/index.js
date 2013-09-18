@@ -56,12 +56,13 @@ exports.toggle = function(req, res){
 
 exports.on = function(req, res){
 
-	var device_id = req.query.id;
+	var device_id = req.params.id;
 
 	if(device_id){
 		td.turnOn(device_id, function(err){
 			if(!err){
 				console.log('Switch is turned on:', device_id);
+				res.json(200, { message: 'success'} );
 			} 
 			else {
 				console.log("failed turning on device:", device_id);
@@ -77,12 +78,13 @@ exports.on = function(req, res){
 
 exports.off = function(req, res){
 
-	var device_id = req.query.id;
+	var device_id = req.params.id;
 
 	if(device_id){
 		td.turnOff(device_id, function(err){
 			if(!err){
 				console.log('Switch is turned off:', device_id);
+				res.json(200, { message: 'success'} );
 			} 
 			else {
 				console.log("failed turning off device:", device_id);
