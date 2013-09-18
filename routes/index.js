@@ -27,30 +27,54 @@ exports.list = function(req, res){
 
 exports.toggle = function(req, res){
 
-	var on = req.query.on ? req.query.on : '1';
-	var off = req.query.off ? req.query.off : '2';
+	var server_up = '1';
+	var server_down = '2';
 
-	td.turnOn(on, function(err){
+	var on, off;
 
-		if(!err){
-			console.log('Switch is turned on:', on);
-			td.turnOff(off, function(err){
-				if(!err){
-					console.log('Switch is turned off:', off);
-					res.json(200, { message: 'success'} );
-				}
-				else {
-					console.log("failed turning off device:", off);
-					res.json(500, { message: 'failure'} );
-				}
-			});
-		} 
-		else {
-			console.log("failed turning on device:", on);
-			res.json(500, { message: 'failure'} );
+	if(req.query.status){
+		if(req.query.status === "down"){
+			on = server_down;
+			off = server_up;
 		}
+		else if(req.query.status === "up"){
+			on = server_up;
+			off = server_down;
+		}
+	}
 
-	});
+	if(req.query.on){
+		on = req.query.on;
+	}
+	
+	if(req.query.off){
+		off = req.query.off;
+	}
+
+	if(on && off){
+
+		td.turnOn(on, function(err){
+
+			if(!err){
+				console.log('Switch is turned on:', on);
+				td.turnOff(off, function(err){
+					if(!err){
+						console.log('Switch is turned off:', off);
+						res.json(200, { message: 'success'} );
+					}
+					else {
+						console.log("failed turning off device:", off);
+						res.json(500, { message: 'failure'} );
+					}
+				});
+			} 
+			else {
+				console.log("failed turning on device:", on);
+				res.json(500, { message: 'failure'} );
+			}
+
+		});
+	}
 
 };
 
