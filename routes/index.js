@@ -12,6 +12,38 @@ exports.index = function(req, res){
 
 };
 
+exports.sync = function(req, res){
+
+	td.list(function(err, list){
+
+		if(!err && list){
+
+			for(var d in list){
+
+				var device = list[d];
+
+				if(device){
+					var id = device[0];
+					var status = device[2];
+					if(id && status && status === "ON"){
+						td.turnOff(id);
+					}
+					else if(id && status && status === "OFF"){
+						td.turnOn(id);
+					}
+				}
+
+			}
+			
+			res.json(200, { message: 'success : syncing' } );			
+		}
+		else {
+			res.json(500, { message: 'failure' } );
+		}
+
+	});
+};
+
 exports.list = function(req, res){
 
 	td.list(function(err, list){
@@ -46,7 +78,7 @@ exports.toggle = function(req, res){
 	if(req.query.on){
 		on = req.query.on;
 	}
-	
+
 	if(req.query.off){
 		off = req.query.off;
 	}

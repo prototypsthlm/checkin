@@ -26,14 +26,18 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
+var token = require('./token.json');
+console.log(token.md5);
+
 var ensureToken = function(req, res, next) {
-  if (req.query.token === "snake") { 
+  if (req.query.token === token.md5) { 
     return next(); 
   }
   res.redirect('/');
 };
 
 app.get('/', routes.index);
+app.get('/sync', routes.sync);
 app.get('/toggle', ensureToken, routes.toggle);
 app.get('/on/:id', ensureToken, routes.on);
 app.get('/off/:id', ensureToken, routes.off);
